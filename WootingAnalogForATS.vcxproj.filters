@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="WootingSdk">
+      <UniqueIdentifier>{cdd933f8-f8c0-4fed-9ad3-1c33ca13050a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ScsSdk">
+      <UniqueIdentifier>{eaa426d9-584a-4503-ad05-b9f5e166c5ec}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="WAfAts.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="WAfAts.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ScsSdk\include\amtrucks\scssdk_ats.h">
+      <Filter>ScsSdk</Filter>
+    </ClInclude>
+    <ClInclude Include="ScsSdk\include\amtrucks\scssdk_input_ats.h">
+      <Filter>ScsSdk</Filter>
+    </ClInclude>
+    <ClInclude Include="ScsSdk\include\eurotrucks2\scssdk_eut2.h">
+      <Filter>ScsSdk</Filter>
+    </ClInclude>
+    <ClInclude Include="ScsSdk\include\eurotrucks2\scssdk_input_eut2.h">
+      <Filter>ScsSdk</Filter>
+    </ClInclude>
+    <ClInclude Include="ScsSdk\include\scssdk.h">
+      <Filter>ScsSdk</Filter>
+    </ClInclude>
+    <ClInclude Include="ScsSdk\include\scssdk_input.h">
+      <Filter>ScsSdk</Filter>
+    </ClInclude>
+    <ClInclude Include="ScsSdk\include\scssdk_input_device.h">
+      <Filter>ScsSdk</Filter>
+    </ClInclude>
+    <ClInclude Include="ScsSdk\include\scssdk_input_event.h">
+      <Filter>ScsSdk</Filter>
+    </ClInclude>
+    <ClInclude Include="ScsSdk\include\scssdk_value.h">
+      <Filter>ScsSdk</Filter>
+    </ClInclude>
+    <ClInclude Include="WootingSdkWrapper\includes\wooting-analog-common.h">
+      <Filter>WootingSdk</Filter>
+    </ClInclude>
+    <ClInclude Include="WootingSdkWrapper\includes\wooting-analog-wrapper.h">
+      <Filter>WootingSdk</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="WootingSdkWrapper\wooting_analog_wrapper.dll.lib">
+      <Filter>WootingSdk</Filter>
+    </Library>
+  </ItemGroup>
+</Project>
