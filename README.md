@@ -3,9 +3,15 @@ Wooting analog for ats and ets2
 
 allows analog inputs from a Wooting keyboard to American Truck Simulator
 
+--------------------------------------------------------------
+
+to use:
+
 requires: https://github.com/WootingKb/wooting-analog-sdk
 
-unzip and copy the contents of WAfAts to "Steam\steamapps\common\American Truck Simulator\bin\win_x64" 
+download latest WAfAts.zip release
+
+unzip and copy the contents to "Steam\steamapps\common\American Truck Simulator\bin\win_x64" 
 
 --------------------------------------------------------------
 
