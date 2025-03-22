@@ -1,4 +1,9 @@
- // Windows stuff.
+/*
+* Wooting analog keyboard inputs for ats and ets2
+* based on 'input' example from scs sdk
+*/
+
+// Windows stuff.
 #ifdef _WIN32
 #  define WINVER 0x0500
 #  define _WIN32_WINNT 0x0500
@@ -23,6 +28,7 @@ scs_log_t game_log = NULL;
 
 //game only has 6 axes to set, 3 single and 3 dual
 //gas, brake, clutch, steer, lookup, lookright
+//should be safe to change if needed(just make sure your imported cfg is adapted as it will try to read more lines)
 const int numOfAxes = 6;
 
 // Prints message to game log.
@@ -72,51 +78,73 @@ struct inputData
 
 inputData tableOfInputs[numOfAxes];
 
+void sanitize(std::string& string, const char* whitelist)
+{
+	int badChar = string.find_first_not_of(whitelist);
+	while (badChar >= 0) {
+		string.erase(badChar, 1);
+		badChar = string.find_first_not_of(whitelist);
+	}
+}
+
 //fill tableOfInputs with user configurable inputs
 void importInputs()
 {
-	std::ifstream cfg("WAfAts.cfg");
+	const char whitelist[] = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890 ._";
+	const char whitelistNum[] = "1234567890";
+	const char separators[] = ",";
+
+	std::ifstream cfg("plugins/WAfAts.cfg");
 	if (cfg.good()) {
 		//do for each line of cfg
 		for (int i{ 0 }; i < numOfAxes; ++i) {
 			char lineString[50];
-			char separators[] = ",";
+			std::string tempString;
 			char* token = NULL;
-			char* next_token = NULL;
+			char* nextToken = NULL;
 
 			cfg.getline(&lineString[0], _countof(lineString));
-			token = strtok_s(lineString, separators, &next_token);
-
+			token = strtok_s(lineString, separators, &nextToken);
 			//assign name
 			if (token != NULL)
 			{
-				tableOfInputs[i].displayName = token;
-				token = strtok_s(NULL, separators, &next_token);
+				tempString = token;
+				sanitize(tempString, whitelist);
+				if (!tempString.empty()) {
+					tableOfInputs[i].displayName = tempString;
+				}
+				token = strtok_s(NULL, separators, &nextToken);
 			}
 			//assign key1
 			if (token != NULL)
 			{
-				tableOfInputs[i].keyCode1 = std::stoi(token);
-				tableOfInputs[i].type = single;
-				token = strtok_s(NULL, separators, &next_token);
+				tempString = token;
+				sanitize(tempString, whitelistNum);
+				if (!tempString.empty()) {
+					tableOfInputs[i].keyCode1 = stoi(tempString);
+					tableOfInputs[i].type = single;
+				}
+				token = strtok_s(NULL, separators, &nextToken);
 			}
 			//assign key2
 			if (token != NULL)
 			{
-				if (std::stoi(token) != 0) {
-
-					tableOfInputs[i].keyCode2 = std::stoi(token);
+				tempString = token;
+				sanitize(tempString, whitelistNum);
+				if (!tempString.empty()) {
+					tableOfInputs[i].keyCode2 = stoi(tempString);
 					tableOfInputs[i].type = dual;
 				}
 			}
 		}
 		log_line(SCS_LOG_TYPE_message, "got user values from cfg file");
 		cfg.close();
+		//printing tableOfInputs, could remove to unclutter log
 		for (int i{ 0 }; i < numOfAxes; ++i) {
-			log_line(SCS_LOG_TYPE_message, "post import display name %i is %s", i, tableOfInputs[i].displayName.c_str());
-			log_line(SCS_LOG_TYPE_message, "post import key1 %i is %u", i, tableOfInputs[i].keyCode1);
-			log_line(SCS_LOG_TYPE_message, "post import key2 %i is %u", i, tableOfInputs[i].keyCode2);
-			log_line(SCS_LOG_TYPE_message, "post import type %i is %i", i, tableOfInputs[i].type);
+			log_line(SCS_LOG_TYPE_message, "imported name %i is %s", i, tableOfInputs[i].displayName.c_str());
+			log_line(SCS_LOG_TYPE_message, "imported key1 %i is %u", i, tableOfInputs[i].keyCode1);
+			log_line(SCS_LOG_TYPE_message, "imported key2 %i is %u", i, tableOfInputs[i].keyCode2);
+			log_line(SCS_LOG_TYPE_message, "imported type %i is %i", i, tableOfInputs[i].type);
 		}
 	}
 	else {
@@ -245,7 +273,6 @@ SCSAPI_RESULT scs_input_init(const scs_u32_t version, const scs_input_init_param
 	}
 
 
-
 	//setup wooting sdk
 	int WootingResult;
 	WootingResult = wooting_analog_initialise();
@@ -257,22 +284,20 @@ SCSAPI_RESULT scs_input_init(const scs_u32_t version, const scs_input_init_param
 		return SCS_RESULT_generic_error;
 	}
 
-	//get user configurable inputs
-	importInputs();
 
 	//setup ingame input type and names
-	scs_input_device_input_t inputs[] = {
-		{"woot1", "Woot1", SCS_VALUE_TYPE_float},
-		{"woot2", "Woot2", SCS_VALUE_TYPE_float},
-		{"woot3", "Woot3", SCS_VALUE_TYPE_float},
-		{"woot4", "Woot4", SCS_VALUE_TYPE_float},
-		{"woot5", "Woot5", SCS_VALUE_TYPE_float},
-		{"woot6", "Woot6", SCS_VALUE_TYPE_float},
-	};
+	scs_input_device_input_t inputs[numOfAxes];
 
-	//import each display name
+	//get user configurable inputs from cfg
+	importInputs();
+
+	//populate inputs[]
+	std::string tempString[numOfAxes];
 	for (int i{ 0 }; i < numOfAxes; ++i) {
+		tempString[i] = ("woot" + std::to_string(i));
+		inputs[i].name = tempString[i].c_str();
 		inputs[i].display_name = tableOfInputs[i].displayName.c_str();
+		inputs[i].value_type = SCS_VALUE_TYPE_float;
 	}
 
 	scs_input_device_t device_info;
@@ -306,7 +331,6 @@ SCSAPI_VOID scs_input_shutdown(void)
 }
 
 // Cleanup
-
 #ifdef _WIN32
 BOOL APIENTRY DllMain(
 	HMODULE module,
